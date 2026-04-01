@@ -66,4 +66,4 @@ The following features are planned for future milestones:
 * HTML
 * CSS 
 * JavaScript (ES6)
-* Fetch API\
+* Fetch API

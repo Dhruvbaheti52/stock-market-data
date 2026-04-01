@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Market Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header class="navbar">
+        <div class="logo">
+            <span class="logo-icon">📊</span>
+            <h1>Market Analyzer <span class="badge">PRO</span></h1>
+        </div>
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search ticker (e.g. AAPL)">
+            </div>
+            <div class="filter-box">
+                <select id="filterSelect">
+                    <option value="all">All Stocks</option>
+                    <option value="gainers">Top Gainers</option>
+                    <option value="losers">Top Losers</option>
+                    <option value="volume">High Volume (>1M)</option>
+                </select>
+            </div>
+            <div class="sort-box">
+                <select id="sortSelect">
+                    <option value="default">Sort By...</option>
+                    <option value="tickerAsc">Ticker (A-Z)</option>
+                    <option value="priceDesc">Price (High-Low)</option>
+                    <option value="priceAsc">Price (Low-High)</option>
+                    <option value="changeDesc">% Change (High-Low)</option>
+                    <option value="changeAsc">% Change (Low-High)</option>
+                    <option value="volumeDesc">Volume (High-Low)</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        <div class="dashboard-header">
+            <h2>Market Overview <span id="dateDisplay"></span></h2>
+            <div class="stats" id="marketStats">
+                <!-- Mini stats injected here -->
+            </div>
+        </div>
+
+        <div id="loading" class="state-message">
+            <div class="spinner"></div>
+            <p>Fetching latest market data...</p>
+        </div>
+
+        <div id="error" class="state-message hidden">
+            <p id="errorText">Failed to load data.</p>
+            <button id="retryBtn" class="btn">Retry</button>
+        </div>
+
+        <div id="noResults" class="state-message hidden">
+            <p>No stocks match your query.</p>
+        </div>
+
+        <div id="stock-container" class="grid hidden">
+            <!-- Cards injected here -->
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
