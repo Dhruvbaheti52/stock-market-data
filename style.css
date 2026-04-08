@@ -24,7 +24,7 @@ body {
   color: var(--text-main);
   min-height: 100vh;
   overflow-x: hidden;
-  /* subtle gradient background */
+
   background-image:
     radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
     radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
@@ -35,9 +35,9 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background: rgba(13, 13, 18, 0.7);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--panel-border);
+  backdrop-filter: blur(20px);
+  background: rgba(13, 13, 18, 0.6);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -206,15 +206,17 @@ body {
 }
 
 .card {
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   padding: 1.5rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
+  animation: fadeIn 0.4s ease;
 }
+
 
 .card::before {
   content: '';
@@ -228,9 +230,8 @@ body {
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2), 0 0 15px rgba(255, 255, 255, 0.02);
-  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
 }
 
 .card.is-gain::before {
@@ -321,5 +322,21 @@ body {
   .controls select {
     flex: 1;
     min-width: 140px;
+  }
+}
+[data-theme="light"] {
+  --bg-color: #ffffff;
+  --text-main: #111827;
+  --panel-bg: rgba(0, 0, 0, 0.03);
+  --panel-border: rgba(0, 0, 0, 0.1);
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

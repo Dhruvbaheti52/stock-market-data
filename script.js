@@ -3,6 +3,8 @@ const STOCK_SYMBOLS = [
   "NVDA","META","NFLX","AMD","INTC"
 ];
 
+const API_KEY = "d7av3shr01qtpbh9uabgd7av3shr01qtpbh9uac0";
+
 let allStocks = [];
 let currentSearch = "";
 let currentFilter = "all";
@@ -21,9 +23,14 @@ const filterSelect = document.getElementById("filterSelect");
 const sortSelect = document.getElementById("sortSelect");
 
 function init() {
+  let debounceTimer;
+
   searchInput.addEventListener("input", (e) => {
-    currentSearch = e.target.value.toUpperCase();
-    applyFiltersAndSort();
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      currentSearch = e.target.value.toUpperCase();
+      applyFiltersAndSort();
+    }, 300);
   });
 
   filterSelect.addEventListener("change", (e) => {
@@ -38,6 +45,10 @@ function init() {
 
   retryBtn.addEventListener("click", fetchAllStocks);
 
+  // date display
+  const dateEl = document.getElementById("dateDisplay");
+  dateEl.innerText = new Date().toLocaleDateString();
+
   fetchAllStocks();
 }
 
@@ -45,17 +56,32 @@ async function fetchAllStocks() {
   showState("loading");
   allStocks = [];
 
-  try {
-    for (let symbol of STOCK_SYMBOLS) {
-      const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=4LFB18WI09DY8YES`;
-      const stock = await fetchStock(url, symbol);
-      if (stock) allStocks.push(stock);
-      await new Promise(res => setTimeout(res, 12000));
+  // cache (30 sec)
+  const cache = localStorage.getItem("stocksCache");
+  if (cache) {
+    const { data, time } = JSON.parse(cache);
+    if (Date.now() - time < 30000) {
+      allStocks = data;
+      updateMarketStats();
+      applyFiltersAndSort();
+      return;
     }
+  }
+
+  try {
+    const promises = STOCK_SYMBOLS.map(symbol => fetchStock(symbol));
+    const results = await Promise.all(promises);
+
+    allStocks = results.filter(Boolean);
 
     if (allStocks.length === 0) {
       throw new Error("No data fetched");
     }
+
+    localStorage.setItem("stocksCache", JSON.stringify({
+      data: allStocks,
+      time: Date.now()
+    }));
 
     updateMarketStats();
     applyFiltersAndSort();
@@ -65,40 +91,39 @@ async function fetchAllStocks() {
   }
 }
 
-async function fetchStock(url, symbol) {
+async function fetchStock(symbol) {
+  const url = `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`;
+
   try {
     const res = await fetch(url);
     const data = await res.json();
 
-    const series = data["Time Series (Daily)"];
-    if (!series) return null;
+    if (!data || data.c === 0) return null;
 
-    const latestDate = Object.keys(series)[0];
-    const today = series[latestDate];
+    const open = data.o;
+    const close = data.c;
+    const high = data.h;
+    const low = data.l;
+    const prevClose = data.pc;
 
-    const open = parseFloat(today["1. open"]);
-    const high = parseFloat(today["2. high"]);
-    const low = parseFloat(today["3. low"]);
-    const close = parseFloat(today["4. close"]);
-    const volume = parseInt(today["5. volume"]);
-
-    const change = close - open;
-    const changePercent = (change / open) * 100;
+    
+    const change = close - prevClose;
+    const changePercent = (change / prevClose) * 100;
 
     return {
       ticker: symbol,
       open,
+      close,
       high,
       low,
-      close,
-      volume,
-      vwap: close,
+      prevClose,
       change,
       changePercent,
       isGain: change >= 0
     };
 
-  } catch {
+  } catch (err) {
+    console.error(symbol, err);
     return null;
   }
 }
@@ -146,19 +171,27 @@ function renderStocks(stocks) {
     const card = document.createElement("div");
     card.className = `card ${stock.isGain ? "is-gain" : "is-loss"}`;
 
-    const sign = stock.isGain ? "+" : "-";
     const arrow = stock.isGain ? "↑" : "↓";
 
     card.innerHTML = `
       <div class="card-header">
         <span>${stock.ticker}</span>
-        <span>$${stock.close.toFixed(2)}</span>
+        <span class="price">$${stock.close.toFixed(2)}</span>
       </div>
+
       <div>
-        ${arrow} ${sign}${Math.abs(stock.changePercent).toFixed(2)}%
+        ${arrow} ${Math.abs(stock.changePercent).toFixed(2)}%
       </div>
-      <div>
-        Vol: ${formatVolume(stock.volume)}
+
+      <div class="card-stats">
+        <div class="stat-item">
+          <span>High</span>
+          <span class="stat-value">$${stock.high.toFixed(2)}</span>
+        </div>
+        <div class="stat-item">
+          <span>Low</span>
+          <span class="stat-value">$${stock.low.toFixed(2)}</span>
+        </div>
       </div>
     `;
 
@@ -168,17 +201,18 @@ function renderStocks(stocks) {
   showState("success");
 }
 
-function formatVolume(vol) {
-  if (vol >= 1e6) return (vol / 1e6).toFixed(1) + "M";
-  if (vol >= 1e3) return (vol / 1e3).toFixed(1) + "K";
-  return vol;
-}
-
 function updateMarketStats() {
   const gainers = allStocks.filter(s => s.isGain).length;
   const losers = allStocks.length - gainers;
 
-  marketStatsEl.innerText = `Gainers: ${gainers} | Losers: ${losers}`;
+  const topGainer = [...allStocks].sort((a, b) => b.changePercent - a.changePercent)[0];
+  const topLoser = [...allStocks].sort((a, b) => a.changePercent - b.changePercent)[0];
+
+  marketStatsEl.innerText = `
+    Gainers: ${gainers} | Losers: ${losers}
+    | Top: ${topGainer.ticker} (+${topGainer.changePercent.toFixed(2)}%)
+    | Worst: ${topLoser.ticker} (${topLoser.changePercent.toFixed(2)}%)
+  `;
 }
 
 function showState(state) {
@@ -199,3 +233,13 @@ function showError(msg) {
 }
 
 init();
+function toggleTheme() {
+  const current = document.documentElement.getAttribute("data-theme");
+  const newTheme = current === "light" ? "dark" : "light";
+
+  document.documentElement.setAttribute("data-theme", newTheme);
+  localStorage.setItem("theme", newTheme);
+}
+
+const savedTheme = localStorage.getItem("theme") || "dark";
+document.documentElement.setAttribute("data-theme", savedTheme);

@@ -17,10 +17,12 @@
             <span class="logo-icon">📊</span>
             <h1>Market Analyzer <span class="badge">PRO</span></h1>
         </div>
+
         <div class="controls">
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Search ticker (e.g. AAPL)">
             </div>
+
             <div class="filter-box">
                 <select id="filterSelect">
                     <option value="all">All Stocks</option>
@@ -29,6 +31,7 @@
                     <option value="volume">High Volume (>1M)</option>
                 </select>
             </div>
+
             <div class="sort-box">
                 <select id="sortSelect">
                     <option value="default">Sort By...</option>
@@ -40,6 +43,9 @@
                     <option value="volumeDesc">Volume (High-Low)</option>
                 </select>
             </div>
+
+            
+            <button onclick="toggleTheme()" class="btn">🌙 / ☀️</button>
         </div>
     </header>
 
@@ -47,7 +53,7 @@
         <div class="dashboard-header">
             <h2>Market Overview <span id="dateDisplay"></span></h2>
             <div class="stats" id="marketStats">
-                <!-- Mini stats injected here -->
+            
             </div>
         </div>
 
@@ -66,7 +72,7 @@
         </div>
 
         <div id="stock-container" class="grid hidden">
-            <!-- Cards injected here -->
+            
         </div>
     </main>
 
