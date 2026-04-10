@@ -21,7 +21,7 @@ The application will allow users to explore stock market data for a selected day
 
 ## API Selection
 
-This project will use the Massive (Polygon) API to retrieve daily aggregated stock data.
+This project will use the Finnhub API to retrieve daily aggregated stock data.
 
 The API provides:
 
