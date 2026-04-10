@@ -1,6 +1,12 @@
 const STOCK_SYMBOLS = [
-  "AAPL","TSLA","AMZN","MSFT","GOOGL",
-  "NVDA","META","NFLX","AMD","INTC"
+  "AAPL","MSFT","GOOGL","AMZN","NVDA",
+  "META","TSLA","NFLX","AMD","INTC",
+
+  "BABA","ORCL","IBM","SAP","ADBE",
+  "CRM","PYPL","UBER","SHOP","SQ",
+
+  "SONY","CSCO","QCOM","TXN","AVGO",
+  "ASML","AMAT","MU","INTU","NOW"
 ];
 
 const API_KEY = "d7av3shr01qtpbh9uabgd7av3shr01qtpbh9uac0";
